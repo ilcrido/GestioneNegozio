@@ -43,42 +43,26 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    var loginGestore: LoginGestore? by remember { mutableStateOf(null) }
-                    var prodottoGestore: ProdottoGestore? by remember { mutableStateOf(null) }
-                    var venditaGestore: VenditaGestore? by remember { mutableStateOf(null) }
-                    var dipendenteGestore: DipendenteGestore? by remember { mutableStateOf(null) }
+                    val loginGestore = remember { LoginGestore(depositoUtente) }
+                    val prodottoGestore = remember { ProdottoGestore(depositoProdotto) }
+                    val venditaGestore = remember { VenditaGestore(depositoVendita, depositoProdotto) }
+                    val dipendenteGestore = remember { DipendenteGestore(depositoUtente) }
 
-                    if (loginGestore == null) {
-                        loginGestore = LoginGestore(depositoUtente)
-                    }
-
-                    if (prodottoGestore == null) {
-                        prodottoGestore = ProdottoGestore(depositoProdotto)
-                    }
-
-                    if (venditaGestore == null) {
-                        venditaGestore = VenditaGestore(depositoVendita, depositoProdotto)
-                    }
-
-                    if (dipendenteGestore == null) {
-                        dipendenteGestore = DipendenteGestore(depositoUtente)
-                    }
-
-                    val utenteCorrente by loginGestore!!.utenteCorrente.collectAsState()
+                    val utenteCorrente by loginGestore.utenteCorrente.collectAsState()
 
                     if (utenteCorrente == null) {
                         LoginSchermata(
-                            loginGestore = loginGestore!!,
+                            loginGestore = loginGestore,
                             onLoginRiuscito = { }
                         )
                     } else {
                         MenuPrincipale(
                             utenteCorrente = utenteCorrente!!,
-                            prodottoGestore = prodottoGestore!!,
-                            venditaGestore = venditaGestore!!,
-                            dipendenteGestore = dipendenteGestore!!,
+                            prodottoGestore = prodottoGestore,
+                            venditaGestore = venditaGestore,
+                            dipendenteGestore = dipendenteGestore,
                             onLogout = {
-                                loginGestore!!.logout()
+                                loginGestore.logout()
                             }
                         )
                     }

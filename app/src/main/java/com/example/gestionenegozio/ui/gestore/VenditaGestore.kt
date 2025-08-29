@@ -12,6 +12,7 @@ import com.example.gestionenegozio.dati.entita.Vendita
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class VenditaGestore(
@@ -38,7 +39,6 @@ class VenditaGestore(
     val statisticheOggi: StateFlow<StatisticheGiornaliere?> = _statisticheOggi.asStateFlow()
 
     init {
-        caricaVenditeRecenti()
         caricaStatisticheOggi()
     }
 
@@ -167,17 +167,31 @@ class VenditaGestore(
     fun caricaVenditeRecenti() {
         viewModelScope.launch {
             try {
-                depositoVendita.ottieniTutteVendite().collect { vendite ->
-                    val venditeConDettagli = vendite.take(20).map { vendita ->
+                println("DEBUG: Inizio caricamento vendite")
+                val vendite = depositoVendita.ottieniTutteVendite().first()
+                println("DEBUG: Trovate ${vendite.size} vendite nel database")
+
+                val venditeConDettagli = vendite.take(20).map { vendita ->
+                    try {
                         val elementi = depositoVendita.ottieniDettagliVendita(vendita.id)
+                        println("DEBUG: Vendita ${vendita.id} ha ${elementi.size} elementi")
                         VenditaConDettagli(
                             vendita = vendita,
                             elementi = elementi
                         )
+                    } catch (e: Exception) {
+                        println("DEBUG: Errore dettagli vendita ${vendita.id}: ${e.message}")
+                        VenditaConDettagli(
+                            vendita = vendita,
+                            elementi = emptyList()
+                        )
                     }
-                    _venditeRecenti.value = venditeConDettagli
                 }
+
+                _venditeRecenti.value = venditeConDettagli
+                println("DEBUG: Aggiornato _venditeRecenti con ${venditeConDettagli.size} vendite")
             } catch (e: Exception) {
+                println("DEBUG: Errore caricamento vendite: ${e.message}")
                 _messaggio.value = "Errore caricamento vendite: ${e.message}"
             }
         }
