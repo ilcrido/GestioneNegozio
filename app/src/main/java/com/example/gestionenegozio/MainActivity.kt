@@ -11,8 +11,11 @@ import androidx.compose.ui.Modifier
 import com.example.gestionenegozio.dati.database.DatabaseNegozio
 import com.example.gestionenegozio.dati.repository.RepositoryUtente
 import com.example.gestionenegozio.dati.repository.RepositoryProdotto
+import com.example.gestionenegozio.dati.repository.RepositoryVendita
 import com.example.gestionenegozio.ui.gestore.LoginGestore
 import com.example.gestionenegozio.ui.gestore.ProdottoGestore
+import com.example.gestionenegozio.ui.gestore.VenditaGestore
+import com.example.gestionenegozio.ui.gestore.DipendenteGestore
 import com.example.gestionenegozio.ui.schermate.LoginSchermata
 import com.example.gestionenegozio.ui.schermate.MenuPrincipale
 import com.example.gestionenegozio.ui.theme.TemaNegozio
@@ -28,6 +31,11 @@ class MainActivity : ComponentActivity() {
         database = DatabaseNegozio.ottieniDatabase(this)
         depositoUtente = RepositoryUtente(database.utenteDao())
         val depositoProdotto = RepositoryProdotto(database.prodottoDao())
+        val depositoVendita = RepositoryVendita(
+            database.venditaDao(),
+            database.elementoVenditaDao(),
+            database.prodottoDao()
+        )
 
         setContent {
             TemaNegozio {
@@ -37,6 +45,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     var loginGestore: LoginGestore? by remember { mutableStateOf(null) }
                     var prodottoGestore: ProdottoGestore? by remember { mutableStateOf(null) }
+                    var venditaGestore: VenditaGestore? by remember { mutableStateOf(null) }
+                    var dipendenteGestore: DipendenteGestore? by remember { mutableStateOf(null) }
 
                     if (loginGestore == null) {
                         loginGestore = LoginGestore(depositoUtente)
@@ -44,6 +54,14 @@ class MainActivity : ComponentActivity() {
 
                     if (prodottoGestore == null) {
                         prodottoGestore = ProdottoGestore(depositoProdotto)
+                    }
+
+                    if (venditaGestore == null) {
+                        venditaGestore = VenditaGestore(depositoVendita, depositoProdotto)
+                    }
+
+                    if (dipendenteGestore == null) {
+                        dipendenteGestore = DipendenteGestore(depositoUtente)
                     }
 
                     val utenteCorrente by loginGestore!!.utenteCorrente.collectAsState()
@@ -57,6 +75,8 @@ class MainActivity : ComponentActivity() {
                         MenuPrincipale(
                             utenteCorrente = utenteCorrente!!,
                             prodottoGestore = prodottoGestore!!,
+                            venditaGestore = venditaGestore!!,
+                            dipendenteGestore = dipendenteGestore!!,
                             onLogout = {
                                 loginGestore!!.logout()
                             }

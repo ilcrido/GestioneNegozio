@@ -5,15 +5,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.gestionenegozio.ui.gestore.VenditaGestore
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VenditeSchermata(
+    venditaGestore: VenditaGestore,
     onNuovaVendita: () -> Unit = {}
 ) {
+    val venditeRecenti by venditaGestore.venditeRecenti.collectAsState()
+    val statisticheOggi by venditaGestore.statisticheOggi.collectAsState()
+    val dateFormat = remember { SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()) }
     Column(
         modifier = Modifier
             .fillMaxSize()

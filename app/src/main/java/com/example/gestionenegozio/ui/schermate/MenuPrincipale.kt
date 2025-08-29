@@ -17,7 +17,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.gestionenegozio.dati.entita.Utente
 import com.example.gestionenegozio.dati.entita.RuoloUtente
+import com.example.gestionenegozio.ui.gestore.VenditaGestore
 import com.example.gestionenegozio.interfaccia.schermate.ProdottiSchermata
+import com.example.gestionenegozio.ui.gestore.DipendenteGestore
 import com.example.gestionenegozio.ui.gestore.ProdottoGestore
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,6 +27,8 @@ import com.example.gestionenegozio.ui.gestore.ProdottoGestore
 fun MenuPrincipale(
     utenteCorrente: Utente,
     prodottoGestore: ProdottoGestore,
+    venditaGestore: VenditaGestore,
+    dipendenteGestore: DipendenteGestore,
     onLogout: () -> Unit
 ) {
     val navController = rememberNavController()
@@ -108,16 +112,60 @@ fun MenuPrincipale(
             }
             composable("vendite") {
                 VenditeSchermata(
+                    venditaGestore = venditaGestore,
                     onNuovaVendita = {
-                        // Per ora mostriamo un messaggio
+                        navController.navigate("nuova_vendita")
+                    }
+                )
+            }
+            composable("nuova_vendita") {
+                NuovaVenditaSchermata(
+                    venditaGestore = venditaGestore,
+                    utenteCorrente = utenteCorrente,
+                    onVenditaCompletata = {
+                        navController.popBackStack("vendite", inclusive = false)
+                    },
+                    onApriScanner = {
+                        navController.navigate("scanner_vendita")
+                    },
+                    onIndietro = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+            composable("scanner_vendita") {
+                ScannerSchermata(
+                    onCodiceTrovato = { codice ->
+                        // Cerca il prodotto e aggiungilo al carrello
+                        prodottoGestore.ottieniProdottoPerCodice(codice) { prodotto ->
+                            if (prodotto != null) {
+                                venditaGestore.aggiungiAlCarrello(prodotto)
+                            }
+                        }
+                        navController.popBackStack("nuova_vendita", inclusive = false)
+                    },
+                    onIndietro = {
+                        navController.popBackStack()
                     }
                 )
             }
             if (utenteCorrente.ruolo == RuoloUtente.ADMIN) {
                 composable("dipendenti") {
                     DipendentiSchermata(
+                        dipendenteGestore = dipendenteGestore,
                         onAggiungiDipendente = {
-                            // Per ora mostriamo un messaggio
+                            navController.navigate("aggiungi_dipendente")
+                        }
+                    )
+                }
+                composable("aggiungi_dipendente") {
+                    AggiungiDipendenteSchermata(
+                        dipendenteGestore = dipendenteGestore,
+                        onSalvato = {
+                            navController.popBackStack("dipendenti", inclusive = false)
+                        },
+                        onIndietro = {
+                            navController.popBackStack()
                         }
                     )
                 }
