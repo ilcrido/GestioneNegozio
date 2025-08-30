@@ -23,6 +23,10 @@ fun VenditeSchermata(
     val statisticheOggi by venditaGestore.statisticheOggi.collectAsState()
     val dateFormat = remember { SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()) }
 
+    LaunchedEffect(Unit) {
+        venditaGestore.caricaVenditeRecenti()
+    }
+
     LaunchedEffect(venditeRecenti) {
         println("DEBUG UI: Ricevute ${venditeRecenti.size} vendite nella UI")
     }

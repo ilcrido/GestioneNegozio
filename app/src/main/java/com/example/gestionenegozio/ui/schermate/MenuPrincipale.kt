@@ -17,10 +17,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.gestionenegozio.dati.entita.Utente
 import com.example.gestionenegozio.dati.entita.RuoloUtente
-import com.example.gestionenegozio.interfaccia.schermate.ProdottiSchermata
-import com.example.gestionenegozio.ui.gestore.DipendenteGestore
 import com.example.gestionenegozio.ui.gestore.ProdottoGestore
 import com.example.gestionenegozio.ui.gestore.VenditaGestore
+import com.example.gestionenegozio.ui.gestore.DipendenteGestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -138,7 +137,6 @@ fun MenuPrincipale(
             composable("scanner_vendita") {
                 ScannerSchermata(
                     onCodiceTrovato = { codice ->
-                        // Cerca il prodotto e aggiungilo al carrello
                         prodottoGestore.ottieniProdottoPerCodice(codice) { prodotto ->
                             if (prodotto != null) {
                                 venditaGestore.aggiungiAlCarrello(prodotto)

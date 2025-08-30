@@ -39,29 +39,39 @@ class ProdottoGestore(private val depositoProdotto: RepositoryProdotto) : ViewMo
 
         viewModelScope.launch {
             try {
-                val prodottoEsistente = nuovoProdotto.codiceBarre?.let { codice ->
+                val prodottoEsistentePerCodice = nuovoProdotto.codiceBarre?.let { codice ->
                     depositoProdotto.trovaProdottoConCodice(codice)
                 }
 
-                if (prodottoEsistente != null) {
-                    _messaggio.value = "Esiste già un prodotto con questo codice a barre"
-                    onCompletato(false)
-                } else {
-                    val id = depositoProdotto.aggiungiProdotto(
-                        nome = nuovoProdotto.nome,
-                        descrizione = nuovoProdotto.descrizione,
-                        codiceBarre = nuovoProdotto.codiceBarre,
-                        prezzo = nuovoProdotto.prezzo,
-                        scorta = nuovoProdotto.scorta,
-                        categoria = nuovoProdotto.categoria
-                    )
+                val prodottoEsistentePerNome = depositoProdotto.cercaProdotti(nuovoProdotto.nome)
+                    .find { it.nome.equals(nuovoProdotto.nome, ignoreCase = true) }
 
-                    if (id > 0) {
-                        _messaggio.value = "Prodotto aggiunto con successo!"
-                        onCompletato(true)
-                    } else {
-                        _messaggio.value = "Errore durante il salvataggio"
+                when {
+                    prodottoEsistentePerCodice != null -> {
+                        _messaggio.value = "Esiste già un prodotto con questo codice a barre"
                         onCompletato(false)
+                    }
+                    prodottoEsistentePerNome != null -> {
+                        _messaggio.value = "Esiste già un prodotto con questo nome"
+                        onCompletato(false)
+                    }
+                    else -> {
+                        val id = depositoProdotto.aggiungiProdotto(
+                            nome = nuovoProdotto.nome,
+                            descrizione = nuovoProdotto.descrizione,
+                            codiceBarre = nuovoProdotto.codiceBarre,
+                            prezzo = nuovoProdotto.prezzo,
+                            scorta = nuovoProdotto.scorta,
+                            categoria = nuovoProdotto.categoria
+                        )
+
+                        if (id > 0) {
+                            _messaggio.value = "Prodotto aggiunto con successo!"
+                            onCompletato(true)
+                        } else {
+                            _messaggio.value = "Errore durante il salvataggio"
+                            onCompletato(false)
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -91,6 +101,17 @@ class ProdottoGestore(private val depositoProdotto: RepositoryProdotto) : ViewMo
                 onRisultato(prodotto)
             } catch (e: Exception) {
                 onRisultato(null)
+            }
+        }
+    }
+
+    fun eliminaProdotto(idProdotto: Long) {
+        viewModelScope.launch {
+            try {
+                depositoProdotto.eliminaProdotto(idProdotto)
+                _messaggio.value = "Prodotto eliminato"
+            } catch (e: Exception) {
+                _messaggio.value = "Errore: ${e.message}"
             }
         }
     }

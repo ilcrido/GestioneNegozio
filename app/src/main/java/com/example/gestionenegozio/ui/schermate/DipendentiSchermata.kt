@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.gestionenegozio.dati.entita.RuoloUtente
 import com.example.gestionenegozio.ui.gestore.DipendenteGestore
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,9 +128,7 @@ fun DipendentiSchermata(
                             if (dipendente.ruolo != RuoloUtente.ADMIN || dipendenti.count { it.ruolo == RuoloUtente.ADMIN } > 1) {
                                 IconButton(
                                     onClick = {
-                                        dipendenteGestore.eliminaDipendente(dipendente.id) {
-                                            // Dipendente eliminato
-                                        }
+                                        dipendenteGestore.eliminaDipendente(dipendente.id)
                                     }
                                 ) {
                                     Icon(Icons.Default.Delete, contentDescription = "Elimina")
@@ -158,7 +155,7 @@ fun DipendentiSchermata(
             }
 
             LaunchedEffect(msg) {
-                delay(3000)
+                kotlinx.coroutines.delay(3000)
                 dipendenteGestore.pulisciMessaggio()
             }
         }

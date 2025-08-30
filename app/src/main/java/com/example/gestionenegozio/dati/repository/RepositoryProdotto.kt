@@ -58,4 +58,5 @@ class RepositoryProdotto(private val prodottoDao: ProdottoDao) {
     fun ottieniProdottiScortaFinita(): Flow<List<Prodotto>> {
         return prodottoDao.ottieniProdottiScortaBassa()
     }
+
 }

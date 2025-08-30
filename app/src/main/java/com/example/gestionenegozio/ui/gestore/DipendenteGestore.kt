@@ -70,15 +70,32 @@ class DipendenteGestore(private val depositoUtente: RepositoryUtente) : ViewMode
         }
     }
 
-    fun eliminaDipendente(idUtente: Long, onCompletato: () -> Unit) {
+    fun eliminaDipendente(idUtente: Long) {
         _caricamento.value = true
 
         viewModelScope.launch {
             try {
-                depositoUtente.eliminaUtente(idUtente)
-                _messaggio.value = "Dipendente eliminato"
-                onCompletato()
+                val utenteCorrente = _dipendenti.value.find { it.id == idUtente }
+                val quantiAdmin = _dipendenti.value.count { it.ruolo == RuoloUtente.ADMIN && it.attivo }
+
+                println("DEBUG: Tentativo elimina utente ${utenteCorrente?.nomeUtente}, ruolo: ${utenteCorrente?.ruolo}")
+                println("DEBUG: Totale admin attivi: $quantiAdmin")
+
+                when {
+                    utenteCorrente == null -> {
+                        _messaggio.value = "Utente non trovato"
+                    }
+                    utenteCorrente.ruolo == RuoloUtente.ADMIN && quantiAdmin <= 1 -> {
+                        _messaggio.value = "Non puoi eliminare l'ultimo amministratore"
+                    }
+                    else -> {
+                        depositoUtente.eliminaUtente(idUtente)
+                        _messaggio.value = "Dipendente eliminato con successo"
+                        caricaDipendenti()
+                    }
+                }
             } catch (e: Exception) {
+                println("DEBUG: Errore eliminazione: ${e.message}")
                 _messaggio.value = "Errore durante l'eliminazione: ${e.message}"
             } finally {
                 _caricamento.value = false

@@ -1,13 +1,15 @@
-package com.example.gestionenegozio.interfaccia.schermate
+package com.example.gestionenegozio.ui.schermate
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -77,28 +79,42 @@ fun ProdottiSchermata(
                     Card(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = prodotto.nome,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "€ ${String.format("%.2f", prodotto.prezzo)}",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = "Scorta: ${prodotto.scorta}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            prodotto.codiceBarre?.let { codice ->
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Codice: $codice",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    text = prodotto.nome,
+                                    style = MaterialTheme.typography.titleMedium
                                 )
+                                Text(
+                                    text = "€ ${String.format("%.2f", prodotto.prezzo)}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "Scorta: ${prodotto.scorta}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                prodotto.codiceBarre?.let { codice ->
+                                    Text(
+                                        text = "Codice: $codice",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    prodottoGestore.eliminaProdotto(prodotto.id)
+                                }
+                            ) {
+                                Icon(Icons.Default.Delete, contentDescription = "Elimina prodotto")
                             }
                         }
                     }
