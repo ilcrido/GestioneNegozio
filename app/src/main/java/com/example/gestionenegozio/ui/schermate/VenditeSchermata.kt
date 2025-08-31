@@ -185,12 +185,7 @@ fun VenditeSchermata(
 
                                     Spacer(modifier = Modifier.height(4.dp))
 
-                                    // Indicazione che è cliccabile
-                                    Text(
-                                        text = "Tocca per vedere i dettagli",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
+
                                 }
                             }
                         }
