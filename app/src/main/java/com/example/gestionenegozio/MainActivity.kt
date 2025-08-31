@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val loginGestore = remember { LoginGestore(depositoUtente) }
                     val prodottoGestore = remember { ProdottoGestore(depositoProdotto) }
-                    val venditaGestore = remember { VenditaGestore(depositoVendita, depositoProdotto) }
+                    val venditaGestore = remember { VenditaGestore(depositoVendita, depositoProdotto, depositoUtente) }
                     val dipendenteGestore = remember { DipendenteGestore(depositoUtente) }
 
                     val utenteCorrente by loginGestore.utenteCorrente.collectAsState()

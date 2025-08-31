@@ -19,6 +19,10 @@ class RepositoryUtente(private val utenteDao: UtenteDao) {
         return utenteDao.ottieniUtentiPerRuolo(RuoloUtente.DIPENDENTE)
     }
 
+    suspend fun ottieniUtentePerId(idUtente: Long): Utente? {
+        return utenteDao.ottieniUtentePerId(idUtente)
+    }
+
     suspend fun creaUtente(nomeUtente: String, password: String, nomeCompleto: String, ruolo: RuoloUtente): Long {
         val nuovoUtente = Utente(
             nomeUtente = nomeUtente,

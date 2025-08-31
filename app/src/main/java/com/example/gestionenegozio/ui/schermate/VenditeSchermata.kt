@@ -58,7 +58,7 @@ fun VenditeSchermata(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // STATISTICHE - Ora utilizzano i dati reali
+        // STATISTICHE
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -98,7 +98,7 @@ fun VenditeSchermata(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // STORICO VENDITE - Ora mostra la lista reale
+        // STORICO VENDITE
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -132,6 +132,7 @@ fun VenditeSchermata(
                                 Column(
                                     modifier = Modifier.padding(12.dp)
                                 ) {
+                                    // Prima riga: ID vendita e data
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween
@@ -148,6 +149,16 @@ fun VenditeSchermata(
 
                                     Spacer(modifier = Modifier.height(4.dp))
 
+                                    // Seconda riga: Dipendente
+                                    Text(
+                                        text = " ${vendita.nomeDipendente}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    // Terza riga: Metodo pagamento e totale
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween

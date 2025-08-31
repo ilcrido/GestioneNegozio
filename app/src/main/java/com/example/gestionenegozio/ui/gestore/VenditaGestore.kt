@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.gestionenegozio.dati.dao.ElementoConProdotto
 import com.example.gestionenegozio.dati.repository.RepositoryVendita
 import com.example.gestionenegozio.dati.repository.RepositoryProdotto
+import com.example.gestionenegozio.dati.repository.RepositoryUtente
 import com.example.gestionenegozio.dati.repository.CosaVendere
 import com.example.gestionenegozio.dati.entita.Prodotto
 import com.example.gestionenegozio.dati.entita.MetodoPagamento
@@ -18,7 +19,8 @@ import java.util.*
 
 class VenditaGestore(
     private val depositoVendita: RepositoryVendita,
-    private val depositoProdotto: RepositoryProdotto
+    private val depositoProdotto: RepositoryProdotto,
+    private val depositoUtente: RepositoryUtente
 ) : ViewModel() {
 
     private val _carrello = MutableStateFlow<List<ElementoCarrello>>(emptyList())
@@ -176,15 +178,22 @@ class VenditaGestore(
                     try {
                         val elementi = depositoVendita.ottieniDettagliVendita(vendita.id)
                         println("DEBUG: Vendita ${vendita.id} ha ${elementi.size} elementi")
+
+                        // Ottieni il nome del dipendente
+                        val dipendente = depositoUtente.ottieniUtentePerId(vendita.idDipendente)
+                        val nomeDipendente = dipendente?.nomeCompleto ?: "Dipendente sconosciuto"
+
                         VenditaConDettagli(
                             vendita = vendita,
-                            elementi = elementi
+                            elementi = elementi,
+                            nomeDipendente = nomeDipendente
                         )
                     } catch (e: Exception) {
                         println("DEBUG: Errore dettagli vendita ${vendita.id}: ${e.message}")
                         VenditaConDettagli(
                             vendita = vendita,
-                            elementi = emptyList()
+                            elementi = emptyList(),
+                            nomeDipendente = "Errore"
                         )
                     }
                 }
@@ -243,7 +252,8 @@ data class ElementoCarrello(
 
 data class VenditaConDettagli(
     val vendita: Vendita,
-    val elementi: List<ElementoConProdotto>
+    val elementi: List<ElementoConProdotto>,
+    val nomeDipendente: String
 )
 
 data class StatisticheGiornaliere(

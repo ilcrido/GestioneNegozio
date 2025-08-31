@@ -27,4 +27,7 @@ interface UtenteDao {
 
     @Query("SELECT COUNT(*) FROM utenti WHERE ruolo = 'ADMIN' AND attivo = 1")
     suspend fun contaAdmin(): Int
+
+    @Query("SELECT * FROM utenti WHERE id = :idUtente AND attivo = 1")
+    suspend fun ottieniUtentePerId(idUtente: Long): Utente?
 }
