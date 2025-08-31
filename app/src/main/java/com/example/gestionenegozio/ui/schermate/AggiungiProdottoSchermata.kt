@@ -27,16 +27,42 @@ fun AggiungiProdottoSchermata(
     var scorta by remember { mutableStateOf("") }
     var categoria by remember { mutableStateOf("") }
     var errore by remember { mutableStateOf<String?>(null) }
+    var prodottoEsistente by remember { mutableStateOf(false) }
+    var prodottoTrovato by remember { mutableStateOf<String?>(null) }
 
     val caricamento by prodottoGestore.caricamento.collectAsState()
     val messaggio by prodottoGestore.messaggio.collectAsState()
 
     val codiceBarreFinale = codiceBarre ?: ""
 
+    // Auto-compila i campi se il prodotto esiste già
+    LaunchedEffect(codiceBarreFinale) {
+        if (codiceBarreFinale.isNotBlank()) {
+            prodottoGestore.ottieniProdottoPerCodice(codiceBarreFinale) { prodotto ->
+                if (prodotto != null) {
+                    // Prodotto trovato - auto-compila i campi
+                    nome = prodotto.nome
+                    descrizione = prodotto.descrizione ?: ""
+                    prezzo = prodotto.prezzo.toString()
+                    scorta = prodotto.scorta.toString()
+                    categoria = prodotto.categoria ?: ""
+                    prodottoEsistente = true
+                    prodottoTrovato = "Prodotto esistente trovato! Puoi modificare i dati se necessario."
+                } else {
+                    // Prodotto non trovato - campi vuoti per nuovo inserimento
+                    prodottoEsistente = false
+                    prodottoTrovato = "Nuovo prodotto - compila tutti i campi."
+                }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nuovo Prodotto") },
+                title = {
+                    Text(if (prodottoEsistente) "Modifica Prodotto" else "Nuovo Prodotto")
+                },
                 navigationIcon = {
                     IconButton(onClick = onIndietro) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Indietro")
@@ -63,18 +89,35 @@ fun AggiungiProdottoSchermata(
                                 return@IconButton
                             }
 
-                            prodottoGestore.aggiungiProdotto(
-                                NuovoProdotto(
-                                    nome = nome.trim(),
-                                    descrizione = descrizione.trim().takeIf { it.isNotBlank() },
-                                    codiceBarre = codiceBarreFinale.takeIf { it.isNotBlank() },
-                                    prezzo = prezzoDouble,
-                                    scorta = scortaInt,
-                                    categoria = categoria.trim().takeIf { it.isNotBlank() }
-                                )
-                            ) { successo ->
-                                if (successo) {
-                                    onSalvato()
+                            if (prodottoEsistente) {
+                                // Aggiorna prodotto esistente
+                                prodottoGestore.aggiornaProdottoPerCodice(
+                                    codiceBarre = codiceBarreFinale,
+                                    nuovoNome = nome.trim(),
+                                    nuovaDescrizione = descrizione.trim().takeIf { it.isNotBlank() },
+                                    nuovoPrezzo = prezzoDouble,
+                                    nuovaScorta = scortaInt,
+                                    nuovaCategoria = categoria.trim().takeIf { it.isNotBlank() }
+                                ) { successo ->
+                                    if (successo) {
+                                        onSalvato()
+                                    }
+                                }
+                            } else {
+                                // Crea nuovo prodotto
+                                prodottoGestore.aggiungiProdotto(
+                                    NuovoProdotto(
+                                        nome = nome.trim(),
+                                        descrizione = descrizione.trim().takeIf { it.isNotBlank() },
+                                        codiceBarre = codiceBarreFinale.takeIf { it.isNotBlank() },
+                                        prezzo = prezzoDouble,
+                                        scorta = scortaInt,
+                                        categoria = categoria.trim().takeIf { it.isNotBlank() }
+                                    )
+                                ) { successo ->
+                                    if (successo) {
+                                        onSalvato()
+                                    }
                                 }
                             }
                         },
@@ -103,7 +146,11 @@ fun AggiungiProdottoSchermata(
             if (codiceBarreFinale.isNotBlank()) {
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                        containerColor = if (prodottoEsistente) {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.primaryContainer
+                        }
                     )
                 ) {
                     Column(
@@ -112,13 +159,33 @@ fun AggiungiProdottoSchermata(
                         Text(
                             "Codice a barre scansionato:",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = if (prodottoEsistente) {
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            }
                         )
                         Text(
                             codiceBarreFinale,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = if (prodottoEsistente) {
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            }
                         )
+
+                        prodottoTrovato?.let { status ->
+                            Text(
+                                status,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (prodottoEsistente) {
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                }
+                            )
+                        }
                     }
                 }
             }

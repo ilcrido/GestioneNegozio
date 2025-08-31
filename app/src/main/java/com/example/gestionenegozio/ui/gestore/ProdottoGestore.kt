@@ -83,6 +83,47 @@ class ProdottoGestore(private val depositoProdotto: RepositoryProdotto) : ViewMo
         }
     }
 
+    fun aggiornaProdottoPerCodice(
+        codiceBarre: String,
+        nuovoNome: String,
+        nuovaDescrizione: String?,
+        nuovoPrezzo: Double,
+        nuovaScorta: Int,
+        nuovaCategoria: String?,
+        onCompletato: (Boolean) -> Unit
+    ) {
+        _caricamento.value = true
+        _messaggio.value = null
+
+        viewModelScope.launch {
+            try {
+                val prodottoEsistente = depositoProdotto.trovaProdottoConCodice(codiceBarre)
+
+                if (prodottoEsistente != null) {
+                    val prodottoAggiornato = prodottoEsistente.copy(
+                        nome = nuovoNome,
+                        descrizione = nuovaDescrizione,
+                        prezzo = nuovoPrezzo,
+                        scorta = nuovaScorta,
+                        categoria = nuovaCategoria
+                    )
+
+                    depositoProdotto.modificaProdotto(prodottoAggiornato)
+                    _messaggio.value = "Prodotto aggiornato con successo!"
+                    onCompletato(true)
+                } else {
+                    _messaggio.value = "Prodotto non trovato"
+                    onCompletato(false)
+                }
+            } catch (e: Exception) {
+                _messaggio.value = "Errore durante l'aggiornamento: ${e.message}"
+                onCompletato(false)
+            } finally {
+                _caricamento.value = false
+            }
+        }
+    }
+
     fun cercaProdotto(termine: String, onRisultato: (List<Prodotto>) -> Unit) {
         viewModelScope.launch {
             try {
