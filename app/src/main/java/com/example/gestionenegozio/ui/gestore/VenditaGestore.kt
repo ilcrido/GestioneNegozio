@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.*
 
 class VenditaGestore(
     private val depositoVendita: RepositoryVendita,
@@ -204,11 +205,22 @@ class VenditaGestore(
                 val inizioGiorno = oggi - (oggi % (24 * 60 * 60 * 1000))
                 val fineGiorno = inizioGiorno + (24 * 60 * 60 * 1000) - 1
 
+                // Calcolo per il mese corrente
+                val calendar = Calendar.getInstance()
+                calendar.set(Calendar.DAY_OF_MONTH, 1)
+                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                calendar.set(Calendar.MILLISECOND, 0)
+                val inizioMese = calendar.timeInMillis
+
                 val totaleOggi = depositoVendita.ottieniStatistiche(inizioGiorno, fineGiorno)
+                val totaleMese = depositoVendita.ottieniStatistiche(inizioMese, oggi)
 
                 _statisticheOggi.value = StatisticheGiornaliere(
                     venditeOggi = totaleOggi.quanteVendite,
-                    incassoOggi = totaleOggi.soldiTotali
+                    incassoOggi = totaleOggi.soldiTotali,
+                    incassoMese = totaleMese.soldiTotali
                 )
             } catch (e: Exception) {
                 _messaggio.value = "Errore caricamento statistiche: ${e.message}"
@@ -236,5 +248,6 @@ data class VenditaConDettagli(
 
 data class StatisticheGiornaliere(
     val venditeOggi: Int,
-    val incassoOggi: Double
+    val incassoOggi: Double,
+    val incassoMese: Double
 )

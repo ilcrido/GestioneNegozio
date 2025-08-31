@@ -23,6 +23,11 @@ fun ProdottiSchermata(
     onAggiungiProdotto: () -> Unit = {}
 ) {
     val prodotti by prodottoGestore.prodotti.collectAsState()
+
+    LaunchedEffect(Unit) {
+        prodottoGestore.caricaProdotti()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -98,14 +103,21 @@ fun ProdottiSchermata(
                                 )
                                 Text(
                                     text = "Scorta: ${prodotto.scorta}",
-                                    style = MaterialTheme.typography.bodyMedium
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = if (prodotto.scorta <= 10) {
+                                        MaterialTheme.colorScheme.error
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    }
                                 )
                                 prodotto.codiceBarre?.let { codice ->
-                                    Text(
-                                        text = "Codice: $codice",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    if (codice.isNotBlank()) {
+                                        Text(
+                                            text = "Codice: $codice",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
 

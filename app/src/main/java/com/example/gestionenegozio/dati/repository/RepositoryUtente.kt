@@ -34,10 +34,7 @@ class RepositoryUtente(private val utenteDao: UtenteDao) {
     }
 
     suspend fun eliminaUtente(idUtente: Long) {
-        val quantiAdmin = utenteDao.contaAdmin()
-        if (quantiAdmin > 1) {
-            utenteDao.disattivaUtente(idUtente)
-        }
+        utenteDao.disattivaUtente(idUtente)
     }
 
     suspend fun ciSonoAdmin(): Boolean {
