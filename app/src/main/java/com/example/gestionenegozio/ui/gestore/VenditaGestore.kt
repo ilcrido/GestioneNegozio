@@ -210,21 +210,59 @@ class VenditaGestore(
     fun caricaStatisticheOggi() {
         viewModelScope.launch {
             try {
-                val oggi = System.currentTimeMillis()
-                val inizioGiorno = oggi - (oggi % (24 * 60 * 60 * 1000))
-                val fineGiorno = inizioGiorno + (24 * 60 * 60 * 1000) - 1
+                // Calcolo per oggi
+                val calendar = Calendar.getInstance()
+
+                // Inizio giorno di oggi
+                val inizioGiornoCalendar = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val inizioGiorno = inizioGiornoCalendar.timeInMillis
+
+                // Fine giorno di oggi
+                val fineGiornoCalendar = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 23)
+                    set(Calendar.MINUTE, 59)
+                    set(Calendar.SECOND, 59)
+                    set(Calendar.MILLISECOND, 999)
+                }
+                val fineGiorno = fineGiornoCalendar.timeInMillis
 
                 // Calcolo per il mese corrente
-                val calendar = Calendar.getInstance()
-                calendar.set(Calendar.DAY_OF_MONTH, 1)
-                calendar.set(Calendar.HOUR_OF_DAY, 0)
-                calendar.set(Calendar.MINUTE, 0)
-                calendar.set(Calendar.SECOND, 0)
-                calendar.set(Calendar.MILLISECOND, 0)
-                val inizioMese = calendar.timeInMillis
+                val inizioMeseCalendar = Calendar.getInstance().apply {
+                    set(Calendar.DAY_OF_MONTH, 1)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val inizioMese = inizioMeseCalendar.timeInMillis
+
+                // Fine del mese corrente
+                val fineMeseCalendar = Calendar.getInstance().apply {
+                    set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
+                    set(Calendar.HOUR_OF_DAY, 23)
+                    set(Calendar.MINUTE, 59)
+                    set(Calendar.SECOND, 59)
+                    set(Calendar.MILLISECOND, 999)
+                }
+                val fineMese = fineMeseCalendar.timeInMillis
+
+                // Debug per verificare i calcoli
+                println("DEBUG STATISTICHE:")
+                println("Inizio giorno: ${Date(inizioGiorno)}")
+                println("Fine giorno: ${Date(fineGiorno)}")
+                println("Inizio mese: ${Date(inizioMese)}")
+                println("Fine mese: ${Date(fineMese)}")
 
                 val totaleOggi = depositoVendita.ottieniStatistiche(inizioGiorno, fineGiorno)
-                val totaleMese = depositoVendita.ottieniStatistiche(inizioMese, oggi)
+                val totaleMese = depositoVendita.ottieniStatistiche(inizioMese, fineMese)
+
+                println("Vendite oggi: ${totaleOggi.quanteVendite}, incasso: €${totaleOggi.soldiTotali}")
+                println("Vendite mese: ${totaleMese.quanteVendite}, incasso: €${totaleMese.soldiTotali}")
 
                 _statisticheOggi.value = StatisticheGiornaliere(
                     venditeOggi = totaleOggi.quanteVendite,
@@ -232,6 +270,8 @@ class VenditaGestore(
                     incassoMese = totaleMese.soldiTotali
                 )
             } catch (e: Exception) {
+                println("Errore caricamento statistiche: ${e.message}")
+                e.printStackTrace()
                 _messaggio.value = "Errore caricamento statistiche: ${e.message}"
             }
         }

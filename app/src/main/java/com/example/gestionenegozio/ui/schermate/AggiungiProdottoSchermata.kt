@@ -17,6 +17,7 @@ import com.example.gestionenegozio.ui.gestore.ProdottoGestore
 @Composable
 fun AggiungiProdottoSchermata(
     codiceBarre: String? = null,
+    idProdotto: Long? = null,
     prodottoGestore: ProdottoGestore,
     onSalvato: () -> Unit,
     onIndietro: () -> Unit
@@ -34,13 +35,30 @@ fun AggiungiProdottoSchermata(
     val messaggio by prodottoGestore.messaggio.collectAsState()
 
     val codiceBarreFinale = codiceBarre ?: ""
+    val modalitaModifica = idProdotto != null
 
-    // Auto-compila i campi se il prodotto esiste già
+    // Auto-compila i campi se stiamo modificando un prodotto esistente
+    LaunchedEffect(idProdotto) {
+        if (idProdotto != null) {
+            prodottoGestore.ottieniProdottoPerId(idProdotto) { prodotto ->
+                if (prodotto != null) {
+                    nome = prodotto.nome
+                    descrizione = prodotto.descrizione ?: ""
+                    prezzo = prodotto.prezzo.toString()
+                    scorta = prodotto.scorta.toString()
+                    categoria = prodotto.categoria ?: ""
+                    prodottoEsistente = true
+                    prodottoTrovato = "Modifica prodotto esistente"
+                }
+            }
+        }
+    }
+
+    // Auto-compila i campi se il prodotto esiste già (tramite codice a barre)
     LaunchedEffect(codiceBarreFinale) {
-        if (codiceBarreFinale.isNotBlank()) {
+        if (codiceBarreFinale.isNotBlank() && idProdotto == null) {
             prodottoGestore.ottieniProdottoPerCodice(codiceBarreFinale) { prodotto ->
                 if (prodotto != null) {
-                    // Prodotto trovato - auto-compila i campi
                     nome = prodotto.nome
                     descrizione = prodotto.descrizione ?: ""
                     prezzo = prodotto.prezzo.toString()
@@ -49,7 +67,6 @@ fun AggiungiProdottoSchermata(
                     prodottoEsistente = true
                     prodottoTrovato = "Prodotto esistente trovato! Puoi modificare i dati se necessario."
                 } else {
-                    // Prodotto non trovato - campi vuoti per nuovo inserimento
                     prodottoEsistente = false
                     prodottoTrovato = "Nuovo prodotto - compila tutti i campi."
                 }
@@ -61,7 +78,7 @@ fun AggiungiProdottoSchermata(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(if (prodottoEsistente) "Modifica Prodotto" else "Nuovo Prodotto")
+                    Text(if (modalitaModifica) "Modifica Prodotto" else if (prodottoEsistente) "Modifica Prodotto" else "Nuovo Prodotto")
                 },
                 navigationIcon = {
                     IconButton(onClick = onIndietro) {
@@ -89,8 +106,22 @@ fun AggiungiProdottoSchermata(
                                 return@IconButton
                             }
 
-                            if (prodottoEsistente) {
-                                // Aggiorna prodotto esistente
+                            if (modalitaModifica) {
+                                // Modalità modifica tramite ID
+                                prodottoGestore.aggiornaProdottoPerId(
+                                    idProdotto = idProdotto!!,
+                                    nuovoNome = nome.trim(),
+                                    nuovaDescrizione = descrizione.trim().takeIf { it.isNotBlank() },
+                                    nuovoPrezzo = prezzoDouble,
+                                    nuovaScorta = scortaInt,
+                                    nuovaCategoria = categoria.trim().takeIf { it.isNotBlank() }
+                                ) { successo ->
+                                    if (successo) {
+                                        onSalvato()
+                                    }
+                                }
+                            } else if (prodottoEsistente) {
+                                // Aggiorna prodotto esistente tramite codice a barre
                                 prodottoGestore.aggiornaProdottoPerCodice(
                                     codiceBarre = codiceBarreFinale,
                                     nuovoNome = nome.trim(),

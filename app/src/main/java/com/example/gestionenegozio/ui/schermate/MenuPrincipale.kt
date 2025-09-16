@@ -69,6 +69,9 @@ fun MenuPrincipale(
                     },
                     onAggiungiProdotto = {
                         navController.navigate("aggiungi_prodotto")
+                    },
+                    onModificaProdotto = { idProdotto ->
+                        navController.navigate("modifica_prodotto/$idProdotto")
                     }
                 )
             }
@@ -87,6 +90,7 @@ fun MenuPrincipale(
             composable("aggiungi_prodotto") {
                 AggiungiProdottoSchermata(
                     codiceBarre = null,
+                    idProdotto = null,
                     prodottoGestore = prodottoGestore,
                     onSalvato = {
                         navController.popBackStack()
@@ -100,6 +104,21 @@ fun MenuPrincipale(
                 val codice = backStackEntry.arguments?.getString("codice")
                 AggiungiProdottoSchermata(
                     codiceBarre = codice,
+                    idProdotto = null,
+                    prodottoGestore = prodottoGestore,
+                    onSalvato = {
+                        navController.popBackStack("prodotti", inclusive = false)
+                    },
+                    onIndietro = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+            composable("modifica_prodotto/{idProdotto}") { backStackEntry ->
+                val idProdotto = backStackEntry.arguments?.getString("idProdotto")?.toLongOrNull()
+                AggiungiProdottoSchermata(
+                    codiceBarre = null,
+                    idProdotto = idProdotto,
                     prodottoGestore = prodottoGestore,
                     onSalvato = {
                         navController.popBackStack("prodotti", inclusive = false)

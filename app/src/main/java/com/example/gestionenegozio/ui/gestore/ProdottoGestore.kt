@@ -157,6 +157,58 @@ class ProdottoGestore(private val depositoProdotto: RepositoryProdotto) : ViewMo
         }
     }
 
+    fun ottieniProdottoPerId(idProdotto: Long, onRisultato: (Prodotto?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val prodotto = depositoProdotto.ottieniProdotto(idProdotto)
+                onRisultato(prodotto)
+            } catch (e: Exception) {
+                onRisultato(null)
+            }
+        }
+    }
+
+    fun aggiornaProdottoPerId(
+        idProdotto: Long,
+        nuovoNome: String,
+        nuovaDescrizione: String?,
+        nuovoPrezzo: Double,
+        nuovaScorta: Int,
+        nuovaCategoria: String?,
+        onCompletato: (Boolean) -> Unit
+    ) {
+        _caricamento.value = true
+        _messaggio.value = null
+
+        viewModelScope.launch {
+            try {
+                val prodottoEsistente = depositoProdotto.ottieniProdotto(idProdotto)
+
+                if (prodottoEsistente != null) {
+                    val prodottoAggiornato = prodottoEsistente.copy(
+                        nome = nuovoNome,
+                        descrizione = nuovaDescrizione,
+                        prezzo = nuovoPrezzo,
+                        scorta = nuovaScorta,
+                        categoria = nuovaCategoria
+                    )
+
+                    depositoProdotto.modificaProdotto(prodottoAggiornato)
+                    _messaggio.value = "Prodotto aggiornato con successo!"
+                    onCompletato(true)
+                } else {
+                    _messaggio.value = "Prodotto non trovato"
+                    onCompletato(false)
+                }
+            } catch (e: Exception) {
+                _messaggio.value = "Errore durante l'aggiornamento: ${e.message}"
+                onCompletato(false)
+            } finally {
+                _caricamento.value = false
+            }
+        }
+    }
+
     fun pulisciMessaggio() {
         _messaggio.value = null
     }
