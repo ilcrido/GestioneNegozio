@@ -12,6 +12,8 @@ import com.example.gestionenegozio.dati.database.DatabaseNegozio
 import com.example.gestionenegozio.dati.repository.RepositoryUtente
 import com.example.gestionenegozio.dati.repository.RepositoryProdotto
 import com.example.gestionenegozio.dati.repository.RepositoryVendita
+import com.example.gestionenegozio.notifiche.NotificaGuadagnoSerale
+import com.example.gestionenegozio.notifiche.NotificaScorteMattutina
 import com.example.gestionenegozio.ui.gestore.LoginGestore
 import com.example.gestionenegozio.ui.gestore.ProdottoGestore
 import com.example.gestionenegozio.ui.gestore.VenditaGestore
@@ -36,6 +38,9 @@ class MainActivity : ComponentActivity() {
             database.elementoVenditaDao(),
             database.prodottoDao()
         )
+
+        NotificaScorteMattutina(this)
+        NotificaGuadagnoSerale(this)
 
         setContent {
             TemaNegozio {
