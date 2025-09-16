@@ -23,6 +23,11 @@ class RepositoryUtente(private val utenteDao: UtenteDao) {
         return utenteDao.ottieniUtentePerId(idUtente)
     }
 
+    // NUOVO: Per ottenere utenti anche se disattivati (per le vendite)
+    suspend fun ottieniUtentePerIdCompleto(idUtente: Long): Utente? {
+        return utenteDao.ottieniUtentePerIdCompleto(idUtente)
+    }
+
     suspend fun creaUtente(nomeUtente: String, password: String, nomeCompleto: String, ruolo: RuoloUtente): Long {
         val nuovoUtente = Utente(
             nomeUtente = nomeUtente,

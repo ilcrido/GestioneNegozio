@@ -30,4 +30,13 @@ interface UtenteDao {
 
     @Query("SELECT * FROM utenti WHERE id = :idUtente AND attivo = 1")
     suspend fun ottieniUtentePerId(idUtente: Long): Utente?
+
+    @Query("SELECT * FROM utenti WHERE nomeUtente = :nomeUtente")
+    suspend fun ottieniUtentePerNomeUtente(nomeUtente: String): Utente?
+
+    @Query("SELECT * FROM utenti WHERE id = :idUtente")
+    suspend fun ottieniUtentePerIdCompleto(idUtente: Long): Utente?
+
+    @Query("UPDATE utenti SET attivo = 1 WHERE id = :idUtente")
+    suspend fun riattivaUtente(idUtente: Long)
 }

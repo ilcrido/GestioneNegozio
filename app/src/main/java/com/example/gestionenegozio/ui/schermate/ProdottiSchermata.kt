@@ -36,14 +36,14 @@ fun ProdottiSchermata(
     val prodotti by prodottoGestore.prodotti.collectAsState()
     var prodottoSelezionato by remember { mutableStateOf<Prodotto?>(null) }
     var filtroSelezionato by remember { mutableStateOf(FiltriProdotti.TUTTI) }
-    var sogliaScocia by remember { mutableStateOf(10) }
+    var sogliaScorta by remember { mutableStateOf(10) }
     var mostraFiltri by remember { mutableStateOf(false) }
 
     // Applica i filtri
-    val prodottiFiltrati = remember(prodotti, filtroSelezionato, sogliaScocia) {
+    val prodottiFiltrati = remember(prodotti, filtroSelezionato, sogliaScorta) {
         when (filtroSelezionato) {
             FiltriProdotti.TUTTI -> prodotti
-            FiltriProdotti.SCORTA_BASSA -> prodotti.filter { it.scorta <= sogliaScocia }
+            FiltriProdotti.SCORTA_BASSA -> prodotti.filter { it.scorta <= sogliaScorta }
             FiltriProdotti.SCORTA_ESAURITA -> prodotti.filter { it.scorta == 0 }
             FiltriProdotti.PREZZO_CRESCENTE -> prodotti.sortedBy { it.prezzo }
             FiltriProdotti.PREZZO_DECRESCENTE -> prodotti.sortedByDescending { it.prezzo }
@@ -141,7 +141,7 @@ fun ProdottiSchermata(
                                     Text(
                                         when(filtro) {
                                             FiltriProdotti.TUTTI -> "Tutti (${prodotti.size})"
-                                            FiltriProdotti.SCORTA_BASSA -> "Scorta bassa (${prodotti.count { it.scorta <= sogliaScocia }})"
+                                            FiltriProdotti.SCORTA_BASSA -> "Scorta bassa (${prodotti.count { it.scorta <= sogliaScorta }})"
                                             FiltriProdotti.SCORTA_ESAURITA -> "Esauriti (${prodotti.count { it.scorta == 0 }})"
                                             FiltriProdotti.PREZZO_CRESCENTE -> "Prezzo crescente"
                                             FiltriProdotti.PREZZO_DECRESCENTE -> "Prezzo decrescente"
@@ -156,7 +156,6 @@ fun ProdottiSchermata(
                         }
                     }
 
-                    // Impostazione soglia scorta (solo se filtro scorta bassa è selezionato)
                     if (filtroSelezionato == FiltriProdotti.SCORTA_BASSA) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(
@@ -170,17 +169,17 @@ fun ProdottiSchermata(
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 IconButton(
-                                    onClick = { if (sogliaScocia > 1) sogliaScocia-- }
+                                    onClick = { if (sogliaScorta > 1) sogliaScorta-- }
                                 ) {
                                     Icon(Icons.Default.Remove, contentDescription = "Diminuisci")
                                 }
                                 Text(
-                                    "$sogliaScocia",
+                                    "$sogliaScorta",
                                     style = MaterialTheme.typography.bodyLarge,
                                     modifier = Modifier.padding(horizontal = 16.dp)
                                 )
                                 IconButton(
-                                    onClick = { sogliaScocia++ }
+                                    onClick = { sogliaScorta++ }
                                 ) {
                                     Icon(Icons.Default.Add, contentDescription = "Aumenta")
                                 }
@@ -279,12 +278,6 @@ fun ProdottiSchermata(
                                         )
                                     }
                                 }
-
-                                Text(
-                                    text = "Tocca per vedere dettagli",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
                             }
 
                             IconButton(
@@ -301,7 +294,6 @@ fun ProdottiSchermata(
         }
     }
 
-    // Dialog informazioni prodotto
     prodottoSelezionato?.let { prodotto ->
         DialogInfoProdotto(
             prodotto = prodotto,
@@ -396,7 +388,6 @@ fun DialogInfoProdotto(
                     }
                 }
 
-                // Avviso scorta bassa
                 if (prodotto.scorta <= 10) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Card(
@@ -425,7 +416,6 @@ fun DialogInfoProdotto(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Pulsanti azioni
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -453,8 +443,6 @@ fun DialogInfoProdotto(
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-
-                // Pulsante chiudi
                 OutlinedButton(
                     onClick = onChiudi,
                     modifier = Modifier.fillMaxWidth()

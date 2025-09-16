@@ -179,8 +179,8 @@ class VenditaGestore(
                         val elementi = depositoVendita.ottieniDettagliVendita(vendita.id)
                         println("DEBUG: Vendita ${vendita.id} ha ${elementi.size} elementi")
 
-                        // Ottieni il nome del dipendente
-                        val dipendente = depositoUtente.ottieniUtentePerId(vendita.idDipendente)
+                        // CORREZIONE: Usa ottieniUtentePerIdCompleto per trovare anche dipendenti disattivati
+                        val dipendente = depositoUtente.ottieniUtentePerIdCompleto(vendita.idDipendente)
                         val nomeDipendente = dipendente?.nomeCompleto ?: "Dipendente sconosciuto"
 
                         VenditaConDettagli(
