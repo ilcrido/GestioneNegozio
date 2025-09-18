@@ -43,7 +43,7 @@ class NotificaGuadagnoSerale(private val context: Context) {
 
     fun programmaNotificaSerale() {
         val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 20)
+            set(Calendar.HOUR_OF_DAY, 21)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
             if (before(Calendar.getInstance())) {
@@ -95,7 +95,7 @@ class RiepilogoSeraleWorker(
 
             val statisticheOggi = repositoryVendita.ottieniStatistiche(inizioGiorno, fineGiorno)
 
-            val messaggio = "Hai guadagnato oggi: €${String.format("%.2f", statisticheOggi.soldiTotali)}"
+            val messaggio = "Hai guadagnato: €${String.format("%.2f", statisticheOggi.soldiTotali)}"
 
             val builder = NotificationCompat.Builder(applicationContext, NotificaGuadagnoSerale.CANALE_GUADAGNI)
                 .setSmallIcon(R.drawable.ic_notification)
